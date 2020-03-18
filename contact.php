@@ -117,7 +117,7 @@ if (isset($_POST['email'])) {
 
         //Content
         $mail->isHTML(true);
-        $mail->Subject = '❗ SContact Me Form ❗';
+        $mail->Subject = '❗ Contact Me Form ❗';
         $mail->Body    = $email_body;
 
         $mail->send();
