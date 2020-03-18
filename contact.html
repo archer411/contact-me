@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+
+<body>
+      <div class="container">
+        <div class="block-heading">
+          <h2 class="text-info">Contact Me</h2>
+          <p>This form goes right to my inbox. Don't be afraid to send me a message!</p>
+        </div>
+        <form style="padding-bottom:10px;">
+          <div class="form-group"><label>Name</label><input class="form-control" type="text" required="" autofocus="" autocomplete="on" id="name"></div>
+          <div class="form-group"><label>Email</label><input class="form-control" type="email" required="" autocomplete="on" inputmode="email" id="email"></div>
+          <div class="form-group"><label>Subject</label><input class="form-control" type="text" required="" autocomplete="off" id="subject"></div>
+          <div class="form-group"><label>Message</label><textarea class="form-control" rows="5" wrap="hard" spellcheck="true" required="" minlength="10" autocomplete="off" id="message"></textarea></div>
+          <div class="form-group"><input type="submit" value="Send" class="btn btn-primary btn-block g-recaptcha" id="submit-form" data-sitekey="6LcEoWkUAAAAAFCQpEw4dNChBfwUAiWNyNNP8zx6" data-callback="sendEmail">
+            <p style="text-align: center; margin-top: 8px; font-size: 7pt; margin-bottom: 0px;">All fields are required.</p>
+            <br>
+
+            <div id="placeholder-alert" style="margin-bottom: 40px; padding-bottom: 26px;"></div>
+            <div role="alert" class="alert alert-success" id="sent-alert" style="display:none;"><span><strong>Email Sent!</strong></span></div>
+
+            <div class="alert alert-warning" role="alert" id="warning-alert" style="display:none;">
+              <strong>Server Rejected!</strong> Please check your inputs for problems.
+            </div>
+
+            <div role="alert" class="alert alert-danger" id="error-alert" style="display:none;"><span><strong>Error!</strong> :(</span></div>
+          </div>
+          <script>
+            $("form").submit(function(e) {
+              e.preventDefault();
+              sendEmail();
+            });
+
+            function sendEmail() {
+              grecaptcha.execute();
+
+              var name = document.getElementById("name").value;
+              var subject = document.getElementById("subject").value;
+              var email = document.getElementById("email").value;
+              var message = document.getElementById("message").value;
+
+              var ipUrl = "https://extreme-ip-lookup.com/json/";
+              $.getJSON(ipUrl,
+                function(json) {
+                  ipJSON = json["contents"];
+                  sendIt(ipJSON);
+                }
+              );
+
+              function sendIt(ipJSON) {
+                document.getElementById("submit-form").disabled = true;
+                var data = {
+                  "name": name,
+                  "email": email,
+                  "subject": subject,
+                  "message": message,
+                  "ipJSON": ipJSON
+                };
+
+                $.ajax({
+                  type: "post",
+                  async: "false",
+                  url: "contact.php",
+                  data: data,
+                  dataType: "text",
+                  success: function(data) {
+                    var servMssg = ['[{"error": "server rejected"}]'];
+                    console.log(data);
+                    var servErr = servMssg.indexOf(data);
+                    if (servErr > -1) {
+                      $('#warning-alert').show();
+                      $('#placeholder-alert').hide();
+                      setTimeout(function() {
+                        $('#warning-alert').hide();
+                        $('#placeholder-alert').show();
+                      }, 10000);
+                    } else if (data.indexOf('[{error ": "phpmailer error "}]') > -1) {
+                      console.log(data);
+                      $('#error-alert').show();
+                      $('#placeholder-alert').hide();
+                      setTimeout(function() {
+                        $('#error-alert').hide();
+                        $('#placeholder-alert').show();
+                      }, 8000);
+                    } else {
+                      $('#sent-alert').show();
+                      $('#placeholder-alert').hide();
+                      setTimeout(function() {
+                        $('#sent-alert').hide();
+                        $('#placeholder-alert').show();
+                      }, 5000);
+                    }
+                    document.getElementById("submit-form").disabled = false;
+                  },
+                  error: function(jqXHR, textStatus, errorThrown) {
+                    console.log("Error!");
+                    console.log(jqXHR);
+                    $('#error-alert').show();
+                    $('#placeholder-alert').hide();
+                    setTimeout(function() {
+                      $('#error-alert').hide();
+                      $('#placeholder-alert').show();
+                    }, 8000);
+                    document.getElementById("submit-form").disabled = false;
+                  }
+                });
+              }
+            }
+          </script>
+          <div class="g-recaptcha" data-sitekey="<site key>" data-callback="sendEmail" data-size="invisible">
+          </div>
+        </form>
+      </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.pack.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
+  <script src="assets/js/script.min.js"></script>
+</body>
+
+</html>
